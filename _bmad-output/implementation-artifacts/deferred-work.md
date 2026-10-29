@@ -37,3 +37,12 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-5-forgot-reset-password.md`
   summary: `tests/test_migrations.py` 只開 `compare_type`，沒有比對 server default；遷移檔與模型的 `server_default` 不一致（例如 `account.credentials_version` 的 `"0"` 被刪掉或改值）時測試照樣通過。測試資料庫每次從空表升級，也測不到「既有帳號升級後拿到 0」（低；若遷移檔被改錯，為 medium：有資料的資料庫升級失敗，或舊登入全部失效）。
   evidence: 2026-10-28 Story 1.5 第二輪 Code Review（Verification Gap）。比對設定自 Story 1.1 起就是如此，不是本 Story 造成。處理時在 `MigrationContext.configure` 加 `"compare_server_default": True`，先跑一次確認其他既有欄位沒有誤報；要完整守住資料升級，另寫一支「升到上一版、插入帳號、再升到 head」的測試。
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-game-settings-and-school-list.md`
+  summary: Story 2.1 第二階段：S36 遊戲設定（列表、新增／編輯頁、段位表）與學校清單分頁的前端畫面，含側欄入口、375 px 卡片版面，以及學校異動後讓 `["identity","schools"]` 查詢失效。
+  evidence: 2026-10-29 使用者決定 2.1 拆兩階段：後台 Sidebar 版面、Data table 由 A 的 1.8 提供（11/1），第一階段只做後端以趕上 2.2 的 10/31 期限。1.8 合併後另寫 spec 實作，並驗收 epics.md Story 2.1 的 S36 相關 AC。
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-game-settings-and-school-list.md`
+  summary: Story 2.1 的兩條 AC 移到 2.2 驗收：以虛構的第三款遊戲（人數、BO、比分型態都與示範遊戲不同）建立賽事並驗證賽事快照的值；修改遊戲預設值後，已建立賽事的快照不變。
+  evidence: 2026-10-29 使用者決定。兩條都需要 2.2 的 Tournament 與 `game_snapshot`，2.1 第一階段只驗證遊戲設定本身（含虛構第三款遊戲可建立）。2.2 的 spec 要把這兩條寫進 I/O Matrix。
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-game-settings-and-school-list.md`
+  summary: （低）Pydantic 內建的 422 訊息是英文：缺欄位、列舉值不合法（例如 `score_type`）、型別不是 list／object 時，`detail[].msg` 不是繁中，前端直接顯示會出現英文。
+  evidence: 2026-10-29 Story 2.1 第一階段審查（Edge Case Hunter）。既有問題，identity 的 API 也一樣（`core/errors.py` 沒有翻譯 `RequestValidationError`）。處理時在 core 加一個 `RequestValidationError` handler，依 `type`（missing、enum、list_type 等）換成繁中訊息，並補測試。

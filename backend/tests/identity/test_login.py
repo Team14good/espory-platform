@@ -14,7 +14,7 @@ from sqlalchemy import Connection
 from sqlmodel import Session, select
 
 from app.core.audit import AuditLog
-from app.core.config import Settings, settings
+from app.core.config import Settings
 from app.core.db import get_session
 from app.core.errors import register_error_handlers
 from app.core.security import ALGORITHM, create_access_token, get_password_hash
@@ -22,56 +22,18 @@ from app.modules.identity import service
 from app.modules.identity.deps import CurrentAccount, PlatformAdmin, VerifiedAccount
 from app.modules.identity.models import Account, School
 from tests.conftest import FrozenClock
+from tests.helpers import API, PASSWORD
+from tests.helpers import bearer as _bearer
+from tests.helpers import login as _login
+from tests.helpers import make_account as _make_account
+from tests.helpers import token_for as _token
 
-API = settings.API_V1_STR
-PASSWORD = "eight-ch"
 INVALID_CREDENTIALS = {
     "detail": {"code": "INVALID_CREDENTIALS", "message": "Email 或密碼錯誤。"}
 }
 AUTHENTICATION_REQUIRED = {
     "detail": {"code": "AUTHENTICATION_REQUIRED", "message": "請先登入。"}
 }
-
-
-def _email() -> str:
-    return f"{uuid.uuid4().hex}@example.com"
-
-
-def _make_account(
-    session: Session,
-    *,
-    verified: bool = True,
-    admin: bool = False,
-    hashed_password: str | None = None,
-    school_id: uuid.UUID | None = None,
-) -> Account:
-    account = Account(
-        email=_email(),
-        hashed_password=hashed_password or get_password_hash(PASSWORD),
-        email_verified=verified,
-        display_name="小安",
-        school_id=school_id,
-        is_platform_admin=admin,
-    )
-    session.add(account)
-    session.flush()
-    return account
-
-
-def _login(client: TestClient, email: str, password: str = PASSWORD) -> Any:
-    return client.post(
-        f"{API}/access-tokens", json={"email": email, "password": password}
-    )
-
-
-def _token(client: TestClient, account: Account) -> str:
-    response = _login(client, account.email)
-    assert response.status_code == 200, response.text
-    return str(response.json()["access_token"])
-
-
-def _bearer(token: str) -> dict[str, str]:
-    return {"Authorization": f"Bearer {token}"}
 
 
 def _schools(session: Session, count: int) -> list[School]:

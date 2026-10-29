@@ -4,11 +4,13 @@
 套用 `CurrentAccount`（或更嚴格的依賴），未登入回 401（tests 會逐一檢查）。
 """
 
+import uuid
+
 from fastapi import APIRouter, status
 
 from app.core.db import SessionDep
 from app.modules.identity import service
-from app.modules.identity.deps import CurrentAccount
+from app.modules.identity.deps import CurrentAccount, PlatformAdmin
 from app.modules.identity.models import (
     AccessToken,
     AccessTokenCreate,
@@ -22,6 +24,7 @@ from app.modules.identity.models import (
     ProfileUpdate,
     PublicSchool,
     RegisteredAccount,
+    SchoolIn,
     VerificationEmailCreate,
 )
 
@@ -45,6 +48,28 @@ router = APIRouter(tags=["identity"])
 def list_schools(session: SessionDep) -> list[PublicSchool]:
     """公開的學校清單（依名稱排序）。"""
     return service.list_schools(session)
+
+
+@router.post("/admin/schools", status_code=status.HTTP_201_CREATED)
+def create_school(
+    session: SessionDep, admin: PlatformAdmin, body: SchoolIn
+) -> PublicSchool:
+    """平台管理員新增學校；名稱重複回 409 `SCHOOL_NAME_TAKEN`。"""
+    school = service.create_school(session, actor_id=admin.id, name=body.name)
+    session.commit()
+    return school
+
+
+@router.patch("/admin/schools/{school_id}")
+def rename_school(
+    session: SessionDep, admin: PlatformAdmin, school_id: uuid.UUID, body: SchoolIn
+) -> PublicSchool:
+    """平台管理員修正學校名稱；不存在回 404 `SCHOOL_NOT_FOUND`，重名回 409。"""
+    school = service.rename_school(
+        session, actor_id=admin.id, school_id=school_id, name=body.name
+    )
+    session.commit()
+    return school
 
 
 @router.post("/accounts", status_code=status.HTTP_201_CREATED)

@@ -111,6 +111,76 @@ export type EmailVerificationCreate = {
 }
 
 /**
+ * GameIn
+ *
+ * 新增或修改遊戲（修改為整份替換，含段位表）。
+ */
+export type GameIn = {
+  /**
+   * Name
+   */
+  name: string
+  /**
+   * Starters
+   */
+  starters: number
+  /**
+   * Substitutes
+   */
+  substitutes: number
+  /**
+   * Default Bo
+   */
+  default_bo: number
+  /**
+   * Game Minutes
+   */
+  game_minutes: number
+  score_type: ScoreType
+  /**
+   * Rank Tiers
+   */
+  rank_tiers: Array<RankTierIn>
+}
+
+/**
+ * GameRead
+ *
+ * 遊戲設定；段位依積分由高到低（同分依名稱）排列。
+ */
+export type GameRead = {
+  /**
+   * Id
+   */
+  id: string
+  /**
+   * Name
+   */
+  name: string
+  /**
+   * Starters
+   */
+  starters: number
+  /**
+   * Substitutes
+   */
+  substitutes: number
+  /**
+   * Default Bo
+   */
+  default_bo: number
+  /**
+   * Game Minutes
+   */
+  game_minutes: number
+  score_type: ScoreType
+  /**
+   * Rank Tiers
+   */
+  rank_tiers: Array<RankTierRead>
+}
+
+/**
  * HTTPValidationError
  */
 export type HTTPValidationError = {
@@ -213,6 +283,34 @@ export type PublicSchool = {
 }
 
 /**
+ * RankTierIn
+ */
+export type RankTierIn = {
+  /**
+   * Name
+   */
+  name: string
+  /**
+   * Score
+   */
+  score: number
+}
+
+/**
+ * RankTierRead
+ */
+export type RankTierRead = {
+  /**
+   * Name
+   */
+  name: string
+  /**
+   * Score
+   */
+  score: number
+}
+
+/**
  * RegisteredAccount
  */
 export type RegisteredAccount = {
@@ -237,6 +335,25 @@ export type RegisteredAccount = {
    */
   email_verified: boolean
 }
+
+/**
+ * SchoolIn
+ *
+ * 平台管理員新增學校或修正學校名稱（名稱去除前後空白後儲存）。
+ */
+export type SchoolIn = {
+  /**
+   * Name
+   */
+  name: string
+}
+
+/**
+ * ScoreType
+ *
+ * 比分型態（AD-18）。
+ */
+export type ScoreType = "win_loss" | "rounds"
 
 /**
  * ValidationError
@@ -317,6 +434,65 @@ export type identityListSchoolsResponses = {
 
 export type identityListSchoolsResponse =
   identityListSchoolsResponses[keyof identityListSchoolsResponses]
+
+export type identityCreateSchoolData = {
+  body: SchoolIn
+  path?: never
+  query?: never
+  url: "/api/v1/admin/schools"
+}
+
+export type identityCreateSchoolErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type identityCreateSchoolError =
+  identityCreateSchoolErrors[keyof identityCreateSchoolErrors]
+
+export type identityCreateSchoolResponses = {
+  /**
+   * Successful Response
+   */
+  201: PublicSchool
+}
+
+export type identityCreateSchoolResponse =
+  identityCreateSchoolResponses[keyof identityCreateSchoolResponses]
+
+export type identityRenameSchoolData = {
+  body: SchoolIn
+  path: {
+    /**
+     * School Id
+     */
+    school_id: string
+  }
+  query?: never
+  url: "/api/v1/admin/schools/{school_id}"
+}
+
+export type identityRenameSchoolErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type identityRenameSchoolError =
+  identityRenameSchoolErrors[keyof identityRenameSchoolErrors]
+
+export type identityRenameSchoolResponses = {
+  /**
+   * Successful Response
+   */
+  200: PublicSchool
+}
+
+export type identityRenameSchoolResponse =
+  identityRenameSchoolResponses[keyof identityRenameSchoolResponses]
 
 export type identityRegisterData = {
   body: AccountCreate
@@ -562,3 +738,113 @@ export type identityListCurrentIdentitiesResponses = {
 
 export type identityListCurrentIdentitiesResponse =
   identityListCurrentIdentitiesResponses[keyof identityListCurrentIdentitiesResponses]
+
+export type tournamentsListGamesData = {
+  body?: never
+  path?: never
+  query?: never
+  url: "/api/v1/admin/games"
+}
+
+export type tournamentsListGamesResponses = {
+  /**
+   * Response Tournaments-List Games
+   *
+   * Successful Response
+   */
+  200: Array<GameRead>
+}
+
+export type tournamentsListGamesResponse =
+  tournamentsListGamesResponses[keyof tournamentsListGamesResponses]
+
+export type tournamentsCreateGameData = {
+  body: GameIn
+  path?: never
+  query?: never
+  url: "/api/v1/admin/games"
+}
+
+export type tournamentsCreateGameErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type tournamentsCreateGameError =
+  tournamentsCreateGameErrors[keyof tournamentsCreateGameErrors]
+
+export type tournamentsCreateGameResponses = {
+  /**
+   * Successful Response
+   */
+  201: GameRead
+}
+
+export type tournamentsCreateGameResponse =
+  tournamentsCreateGameResponses[keyof tournamentsCreateGameResponses]
+
+export type tournamentsReadGameData = {
+  body?: never
+  path: {
+    /**
+     * Game Id
+     */
+    game_id: string
+  }
+  query?: never
+  url: "/api/v1/admin/games/{game_id}"
+}
+
+export type tournamentsReadGameErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type tournamentsReadGameError =
+  tournamentsReadGameErrors[keyof tournamentsReadGameErrors]
+
+export type tournamentsReadGameResponses = {
+  /**
+   * Successful Response
+   */
+  200: GameRead
+}
+
+export type tournamentsReadGameResponse =
+  tournamentsReadGameResponses[keyof tournamentsReadGameResponses]
+
+export type tournamentsUpdateGameData = {
+  body: GameIn
+  path: {
+    /**
+     * Game Id
+     */
+    game_id: string
+  }
+  query?: never
+  url: "/api/v1/admin/games/{game_id}"
+}
+
+export type tournamentsUpdateGameErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type tournamentsUpdateGameError =
+  tournamentsUpdateGameErrors[keyof tournamentsUpdateGameErrors]
+
+export type tournamentsUpdateGameResponses = {
+  /**
+   * Successful Response
+   */
+  200: GameRead
+}
+
+export type tournamentsUpdateGameResponse =
+  tournamentsUpdateGameResponses[keyof tournamentsUpdateGameResponses]
