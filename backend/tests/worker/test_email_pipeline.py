@@ -27,7 +27,7 @@ def _link_from(html: str) -> str:
 def test_jobs_are_registered_in_order() -> None:
     names = [getattr(job, "__name__", "") for job in JOBS]
 
-    assert names == ["dispatch_outbox", "send_pending_email"]
+    assert names == ["open_registrations", "dispatch_outbox", "send_pending_email"]
 
 
 def test_signup_email_is_sent_by_the_next_round_and_link_verifies(

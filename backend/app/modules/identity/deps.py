@@ -58,3 +58,17 @@ def require_platform_admin(account: CurrentAccount) -> AccountRead:
 
 
 PlatformAdmin = Annotated[AccountRead, Depends(require_platform_admin)]
+
+
+def require_organizer(account: CurrentAccount) -> AccountRead:
+    """已登入的主辦方；其他帳號回 403 `ORGANIZER_REQUIRED`。"""
+    if not account.is_organizer:
+        raise BusinessError(
+            "ORGANIZER_REQUIRED",
+            "只有主辦方可以使用這個功能。",
+            status_code=403,
+        )
+    return account
+
+
+Organizer = Annotated[AccountRead, Depends(require_organizer)]

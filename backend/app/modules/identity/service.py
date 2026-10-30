@@ -33,6 +33,7 @@ from app.modules.identity.models import (
     ProfileUpdate,
     PublicSchool,
     RegisteredAccount,
+    School,
     TokenPurpose,
     VerificationEmailRequested,
     normalize_email,
@@ -82,6 +83,66 @@ def list_schools(session: Session) -> list[PublicSchool]:
         PublicSchool.model_validate(school, from_attributes=True)
         for school in repository.list_schools(session)
     ]
+
+
+def _school_name_taken() -> BusinessError:
+    return BusinessError("SCHOOL_NAME_TAKEN", "已經有同名的學校。", status_code=409)
+
+
+def create_school(session: Session, *, actor_id: uuid.UUID, name: str) -> PublicSchool:
+    """平台管理員新增學校；名稱重複拋 409 `SCHOOL_NAME_TAKEN`，寫 `school.created`。"""
+    if repository.get_school_by_name(session, name) is not None:
+        raise _school_name_taken()
+    school = School(name=name, created_at=clock.now())
+    try:
+        repository.save_school(session, school, name=name)
+    except repository.DuplicateSchoolNameError:
+        # 兩個請求同時新增同名學校：後到的撞到唯一索引
+        raise _school_name_taken() from None
+    audit.record(
+        session,
+        actor_id=actor_id,
+        tournament_id=None,
+        action="school.created",
+        entity_type="school",
+        entity_id=school.id,
+        before=None,
+        after={"name": school.name},
+    )
+    return PublicSchool.model_validate(school, from_attributes=True)
+
+
+def rename_school(
+    session: Session, *, actor_id: uuid.UUID, school_id: uuid.UUID, name: str
+) -> PublicSchool:
+    """平台管理員修正學校名稱；帳號以 `school_id` 關聯，改名不影響既有帳號。
+
+    不存在拋 404 `SCHOOL_NOT_FOUND`；與其他學校同名拋 409 `SCHOOL_NAME_TAKEN`；
+    名稱有變動時才寫 `school.renamed`。
+    """
+    school = repository.get_school_for_update(session, school_id)
+    if school is None:
+        raise BusinessError("SCHOOL_NOT_FOUND", "找不到這間學校。", status_code=404)
+    if school.name != name:
+        same_name = repository.get_school_by_name(session, name)
+        if same_name is not None and same_name.id != school.id:
+            raise _school_name_taken()
+        old_name = school.name
+        try:
+            repository.save_school(session, school, name=name)
+        except repository.DuplicateSchoolNameError:
+            raise _school_name_taken() from None
+        audit.record(
+            session,
+            actor_id=actor_id,
+            tournament_id=None,
+            action="school.renamed",
+            entity_type="school",
+            entity_id=school.id,
+            before={"name": old_name},
+            after={"name": name},
+        )
+    return PublicSchool.model_validate(school, from_attributes=True)
 
 
 def get_account_contact(

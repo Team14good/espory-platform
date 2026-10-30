@@ -199,6 +199,28 @@ class PublicSchool(BaseModel):
     name: str
 
 
+SCHOOL_NAME_MAX_LENGTH = 255
+
+
+def _validate_school_name(value: str) -> str:
+    name = value.strip()
+    if not name:
+        raise PydanticCustomError("school_name_required", "請輸入學校名稱")
+    if len(name) > SCHOOL_NAME_MAX_LENGTH:
+        raise PydanticCustomError(
+            "school_name_too_long", f"學校名稱最多 {SCHOOL_NAME_MAX_LENGTH} 個字"
+        )
+    return name
+
+
+class SchoolIn(BaseModel):
+    """平台管理員新增學校或修正學校名稱（名稱去除前後空白後儲存）。"""
+
+    name: Annotated[
+        str, BeforeValidator(_require_str), AfterValidator(_validate_school_name)
+    ]
+
+
 class AccountCreate(BaseModel):
     email: EmailField
     password: PasswordField

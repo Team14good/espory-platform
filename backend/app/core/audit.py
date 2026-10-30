@@ -19,8 +19,8 @@ from app.core import clock
 class AuditLogBase(SQLModel):
     # 操作者；None 代表 system（worker 自動執行）
     actor_id: uuid.UUID | None = Field(default=None, foreign_key="account.id")
-    # 所屬賽事；帳號類操作為 None。外鍵由 Story 2.2 建 tournament 表時補上
-    tournament_id: uuid.UUID | None = None
+    # 所屬賽事；帳號類操作為 None。外鍵在 Story 2.2 建立 tournament 表時加上
+    tournament_id: uuid.UUID | None = Field(default=None, foreign_key="tournament.id")
     action: str = Field(max_length=100)
     entity_type: str = Field(max_length=100)
     entity_id: uuid.UUID

@@ -6,6 +6,9 @@ import type {
   identityCheckPasswordResetLinkData,
   identityCheckPasswordResetLinkErrors,
   identityCheckPasswordResetLinkResponses,
+  identityCreateSchoolData,
+  identityCreateSchoolErrors,
+  identityCreateSchoolResponses,
   identityListCurrentIdentitiesData,
   identityListCurrentIdentitiesResponses,
   identityListSchoolsData,
@@ -18,6 +21,9 @@ import type {
   identityRegisterData,
   identityRegisterErrors,
   identityRegisterResponses,
+  identityRenameSchoolData,
+  identityRenameSchoolErrors,
+  identityRenameSchoolResponses,
   identityRequestPasswordResetEmailData,
   identityRequestPasswordResetEmailErrors,
   identityRequestPasswordResetEmailResponses,
@@ -33,6 +39,27 @@ import type {
   identityVerifyEmailData,
   identityVerifyEmailErrors,
   identityVerifyEmailResponses,
+  tournamentsCreateGameData,
+  tournamentsCreateGameErrors,
+  tournamentsCreateGameResponses,
+  tournamentsCreateTournamentData,
+  tournamentsCreateTournamentErrors,
+  tournamentsCreateTournamentResponses,
+  tournamentsListGamesData,
+  tournamentsListGamesForOrganizerData,
+  tournamentsListGamesForOrganizerResponses,
+  tournamentsListGamesResponses,
+  tournamentsListMyTournamentsData,
+  tournamentsListMyTournamentsResponses,
+  tournamentsReadGameData,
+  tournamentsReadGameErrors,
+  tournamentsReadGameResponses,
+  tournamentsReadMyTournamentData,
+  tournamentsReadMyTournamentErrors,
+  tournamentsReadMyTournamentResponses,
+  tournamentsUpdateGameData,
+  tournamentsUpdateGameErrors,
+  tournamentsUpdateGameResponses,
   utilsHealthCheckData,
   utilsHealthCheckResponses,
 } from "./types.gen"
@@ -91,6 +118,54 @@ export class IdentityService {
       responseType: "json",
       url: "/api/v1/schools",
       ...options,
+    })
+  }
+
+  /**
+   * Create School
+   *
+   * 平台管理員新增學校；名稱重複回 409 `SCHOOL_NAME_TAKEN`。
+   */
+  public static createSchool<ThrowOnError extends boolean = true>(
+    options: Options<identityCreateSchoolData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).post<
+      identityCreateSchoolResponses,
+      identityCreateSchoolErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/admin/schools",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    })
+  }
+
+  /**
+   * Rename School
+   *
+   * 平台管理員修正學校名稱；不存在回 404 `SCHOOL_NOT_FOUND`，重名回 409。
+   */
+  public static renameSchool<ThrowOnError extends boolean = true>(
+    options: Options<identityRenameSchoolData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).patch<
+      identityRenameSchoolResponses,
+      identityRenameSchoolErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/admin/schools/{school_id}",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
     })
   }
 
@@ -316,6 +391,180 @@ export class IdentityService {
       responseType: "json",
       security: [{ scheme: "bearer", type: "http" }],
       url: "/api/v1/accounts/me/identities",
+      ...options,
+    })
+  }
+}
+
+export class TournamentsService {
+  /**
+   * List Games
+   *
+   * 所有遊戲設定（依名稱排序）；只限平台管理員。
+   */
+  public static listGames<ThrowOnError extends boolean = true>(
+    options?: Options<tournamentsListGamesData, ThrowOnError>,
+  ) {
+    return (options?.client ?? client).get<
+      tournamentsListGamesResponses,
+      unknown,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/admin/games",
+      ...options,
+    })
+  }
+
+  /**
+   * Create Game
+   *
+   * 新增遊戲；名稱重複回 409 `GAME_NAME_TAKEN`。
+   */
+  public static createGame<ThrowOnError extends boolean = true>(
+    options: Options<tournamentsCreateGameData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).post<
+      tournamentsCreateGameResponses,
+      tournamentsCreateGameErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/admin/games",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    })
+  }
+
+  /**
+   * Read Game
+   *
+   * 一款遊戲的設定；不存在回 404 `GAME_NOT_FOUND`。
+   */
+  public static readGame<ThrowOnError extends boolean = true>(
+    options: Options<tournamentsReadGameData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).get<
+      tournamentsReadGameResponses,
+      tournamentsReadGameErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/admin/games/{game_id}",
+      ...options,
+    })
+  }
+
+  /**
+   * Update Game
+   *
+   * 整份替換遊戲設定（含段位表）；不存在回 404，名稱重複回 409。
+   */
+  public static updateGame<ThrowOnError extends boolean = true>(
+    options: Options<tournamentsUpdateGameData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).put<
+      tournamentsUpdateGameResponses,
+      tournamentsUpdateGameErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/admin/games/{game_id}",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    })
+  }
+
+  /**
+   * List Games For Organizer
+   *
+   * 主辦方建立賽事時可選的遊戲（依名稱排序）；只限主辦方。
+   */
+  public static listGamesForOrganizer<ThrowOnError extends boolean = true>(
+    options?: Options<tournamentsListGamesForOrganizerData, ThrowOnError>,
+  ) {
+    return (options?.client ?? client).get<
+      tournamentsListGamesForOrganizerResponses,
+      unknown,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/games",
+      ...options,
+    })
+  }
+
+  /**
+   * List My Tournaments
+   *
+   * 目前主辦方建立的賽事，新建立的在前。
+   */
+  public static listMyTournaments<ThrowOnError extends boolean = true>(
+    options?: Options<tournamentsListMyTournamentsData, ThrowOnError>,
+  ) {
+    return (options?.client ?? client).get<
+      tournamentsListMyTournamentsResponses,
+      unknown,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/organizer/tournaments",
+      ...options,
+    })
+  }
+
+  /**
+   * Create Tournament
+   *
+   * 建立賽事；遊戲不存在回 404 `GAME_NOT_FOUND`，欄位不合法回 422。
+   */
+  public static createTournament<ThrowOnError extends boolean = true>(
+    options: Options<tournamentsCreateTournamentData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).post<
+      tournamentsCreateTournamentResponses,
+      tournamentsCreateTournamentErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/organizer/tournaments",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    })
+  }
+
+  /**
+   * Read My Tournament
+   *
+   * 主辦方自己的賽事；不存在回 404，別人的賽事回 403 `TOURNAMENT_OWNER_REQUIRED`。
+   */
+  public static readMyTournament<ThrowOnError extends boolean = true>(
+    options: Options<tournamentsReadMyTournamentData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).get<
+      tournamentsReadMyTournamentResponses,
+      tournamentsReadMyTournamentErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/organizer/tournaments/{tournament_id}",
       ...options,
     })
   }

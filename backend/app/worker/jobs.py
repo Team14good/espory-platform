@@ -9,6 +9,7 @@ from sqlmodel import Session
 from app.core import events
 from app.modules.notifications import service as notifications_service
 from app.modules.notifications.email import EmailSender, SmtpEmailSender
+from app.modules.tournaments import service as tournaments_service
 from app.worker import Job
 
 
@@ -30,4 +31,13 @@ def make_send_email_job(sender: EmailSender) -> Job:
     return send_pending_email
 
 
-JOBS: list[Job] = [dispatch_outbox, make_send_email_job(SmtpEmailSender())]
+def open_registrations(session: Session) -> bool:
+    """把一筆報名開始已到的「尚未開放」賽事轉為開放報名（操作者為系統）。"""
+    return tournaments_service.open_due_registration(session)
+
+
+JOBS: list[Job] = [
+    open_registrations,
+    dispatch_outbox,
+    make_send_email_job(SmtpEmailSender()),
+]
