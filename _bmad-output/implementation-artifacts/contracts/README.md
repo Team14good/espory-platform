@@ -5,7 +5,7 @@ CONTRIBUTING 6.5：各模組負責人寫下別人會呼叫的 `service.py` 公�
 | 模組 | 負責人 | 約定 |
 | --- | --- | --- |
 | competition | D 黃鉅燊 | [competition.md](competition.md) |
-| tournaments | B 蘇采羚 | 待補；competition 需要的部分先列在 competition.md〈二〉 |
+| tournaments | B 蘇采羚 | [tournaments.md](tournaments.md) |
 | registration | C 邱芯彤 | 待補；competition 需要的部分先列在 competition.md〈二〉 |
 | identity、notifications | A 王閎立 | 待補 |
 

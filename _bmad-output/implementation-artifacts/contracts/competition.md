@@ -88,7 +88,7 @@ class PublicBracket(BaseModel):
 | `advance(session, *, match) -> None` | B（6.2 更正後、6.5） | 勝隊進下一場、準決賽敗隊進季軍賽；對手確定不會有隊伍時自動 walkover，季軍賽必要時轉為已取消 | 5.5 |
 | `confirm_walkover(session, *, match) -> None` | B（6.5） | 一方確定不會有隊伍時以 walkover 確認並推進 | 5.5 |
 
-申訴相關的 `mark_appealed`、`uphold_result`、`correct_result`、`replay_match`：設計文件放在 MatchService，epic 6 由 disputes 呼叫。**提議比照 6.6 的 `disqualify`，由 B 寫在 competition 新增的檔案，`service.py` 只新增這幾個公開函式，D 審查。** 請 B 確認。
+申訴相關的 `mark_appealed`、`uphold_result`、`correct_result`、`replay_match`：設計文件放在 MatchService，epic 6 由 disputes 呼叫。**比照 6.6 的 `disqualify`，由 B 寫在 competition 新增的檔案，`service.py` 只新增這幾個公開函式，D 審查。**（B 已確認，2026-10-30）
 
 ### 事件（`core.events.publish`，期中只發不通知）
 
@@ -116,9 +116,9 @@ class PublicBracket(BaseModel):
 | ★ `list_referees(session, *, tournament_id) -> list[RefereeRead]` | 4.4 的 S30 選單 | `RefereeRead {account_id, display_name}` |
 | `bo_for_round(session, *, tournament_id, round_no) -> int` | 4.3、5.3、5.4 | 期中一律回賽事的 BO |
 
-`TournamentRead` 需要的欄位（名稱依 D 文件的 Tournament 類別）：
+`TournamentRead` 需要的欄位（完整定義與其他函式見 [tournaments.md](tournaments.md)）：
 
-`id`, `organizer_id`, `name`, `status`, `mode`, `capacity`, `registration_end`, `start_at`, `round_interval_minutes`, `forfeit_minutes`, `appeal_minutes`, `bo`, `game_minutes_per_game`（遊戲快照的每局預估時間）, `score_type`
+`id`, `organizer_id`, `name`, `status`, `mode`, `capacity`, `registration_end`, `start_at`, `round_interval_minutes`, `forfeit_minutes`, `appeal_minutes`, `bo`, `game_minutes`（遊戲快照的每局預估時間）, `score_type`
 
 ### registration（C）
 
@@ -133,6 +133,6 @@ class PublicBracket(BaseModel):
 
 ## 三、待確認
 
-1. 申訴相關函式由誰實作（見〈一〉最後一段），請 B 回覆。
+1. ~~申訴相關函式由誰實作~~：B 實作、D 審查（B 已確認，2026-10-30）。
 2. `finalize_for_draw` 合併優先期分配與截止補位，請 C 確認可行。
-3. `TournamentRead` 的欄位名稱以 B 實作為準，B 定案後直接改這份。
+3. ~~`TournamentRead` 的欄位名稱~~：以 [tournaments.md](tournaments.md) 為準，每局預估時間改名為 `game_minutes`（2026-10-30）。
