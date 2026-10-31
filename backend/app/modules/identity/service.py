@@ -427,6 +427,8 @@ def list_identities(session: Session, account: AccountRead) -> list[Identity]:  
     """
     identities = [
         Identity(key=IdentityKey.BROWSE, label="瀏覽賽事", home_path="/"),
+        # Story 3.1：所有登入帳號都顯示（沒有隊伍時 S12 顯示空狀態）
+        Identity(key=IdentityKey.MY_TEAMS, label="我的隊伍", home_path="/me/teams"),
     ]
     if account.is_platform_admin:
         identities.append(

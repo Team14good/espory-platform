@@ -274,6 +274,8 @@ class IdentityKey(StrEnum):
 
     BROWSE = "browse"
     PLATFORM_ADMIN = "platform_admin"
+    # Story 3.1：所有登入帳號都有「我的隊伍」
+    MY_TEAMS = "my_teams"
 
 
 class Identity(BaseModel):

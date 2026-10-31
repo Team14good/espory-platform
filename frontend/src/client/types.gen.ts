@@ -140,7 +140,43 @@ export type Identity = {
  *
  * 身分切換器的身分；之後的 Story 會加入我的隊伍、裁判、主辦方後台。
  */
-export type IdentityKey = "browse" | "platform_admin"
+export type IdentityKey = "browse" | "platform_admin" | "my_teams"
+
+/**
+ * MemberRole
+ *
+ * 隊員角色：隊長、選手。
+ */
+export type MemberRole = "captain" | "player"
+
+/**
+ * MyTeamCard
+ *
+ * S12 我的隊伍：每支隊伍一張 Registration status card。
+ */
+export type MyTeamCard = {
+  /**
+   * Team Id
+   */
+  team_id: string
+  /**
+   * Team Name
+   */
+  team_name: string
+  /**
+   * Tournament Id
+   */
+  tournament_id: string
+  /**
+   * Tournament Name
+   */
+  tournament_name: string
+  /**
+   * Game Name
+   */
+  game_name: string
+  registration_status: RegistrationStatus
+}
 
 /**
  * PasswordResetCheck
@@ -236,6 +272,147 @@ export type RegisteredAccount = {
    * Email Verified
    */
   email_verified: boolean
+}
+
+/**
+ * RegistrationStatus
+ *
+ * 報名狀態：組隊中、已送出・待分配、正取、候補、退回、撤回、已參賽、退賽、取消資格。
+ */
+export type RegistrationStatus =
+  | "forming"
+  | "pending"
+  | "accepted"
+  | "waitlisted"
+  | "rejected"
+  | "withdrawn"
+  | "drawn"
+  | "retired"
+  | "disqualified"
+
+/**
+ * TeamCreate
+ *
+ * S16 建立隊伍。
+ */
+export type TeamCreate = {
+  /**
+   * Name
+   */
+  name: string
+}
+
+/**
+ * TeamDetail
+ *
+ * S17 隊伍頁：只有隊員看得到（含邀請 token）。
+ */
+export type TeamDetail = {
+  /**
+   * Id
+   */
+  id: string
+  /**
+   * Name
+   */
+  name: string
+  /**
+   * Tournament Id
+   */
+  tournament_id: string
+  /**
+   * Tournament Name
+   */
+  tournament_name: string
+  /**
+   * Game Name
+   */
+  game_name: string
+  /**
+   * Starters
+   */
+  starters: number
+  /**
+   * Substitutes
+   */
+  substitutes: number
+  /**
+   * Max Members
+   */
+  max_members: number
+  /**
+   * Members
+   */
+  members: Array<TeamMemberRead>
+  registration_status: RegistrationStatus
+  /**
+   * Invite Token
+   */
+  invite_token: string
+  /**
+   * Invite Status
+   */
+  invite_status: "active" | "full"
+  my_role: MemberRole
+}
+
+/**
+ * TeamInvitePreview
+ *
+ * S19 加入隊伍前的公開預覽：不含隊員名單與任何個資（AD-19）。
+ */
+export type TeamInvitePreview = {
+  /**
+   * Team Id
+   */
+  team_id: string
+  /**
+   * Team Name
+   */
+  team_name: string
+  /**
+   * Tournament Id
+   */
+  tournament_id: string
+  /**
+   * Tournament Name
+   */
+  tournament_name: string
+  /**
+   * Game Name
+   */
+  game_name: string
+  /**
+   * Member Count
+   */
+  member_count: number
+  /**
+   * Max Members
+   */
+  max_members: number
+  /**
+   * Invite Status
+   */
+  invite_status: "active" | "full"
+}
+
+/**
+ * TeamMemberRead
+ */
+export type TeamMemberRead = {
+  /**
+   * Account Id
+   */
+  account_id: string
+  /**
+   * Display Name
+   */
+  display_name: string
+  role: MemberRole
+  /**
+   * Joined At
+   */
+  joined_at: string
 }
 
 /**
@@ -562,3 +739,150 @@ export type identityListCurrentIdentitiesResponses = {
 
 export type identityListCurrentIdentitiesResponse =
   identityListCurrentIdentitiesResponses[keyof identityListCurrentIdentitiesResponses]
+
+export type registrationCreateTeamData = {
+  body: TeamCreate
+  path: {
+    /**
+     * Tournament Id
+     */
+    tournament_id: string
+  }
+  query?: never
+  url: "/api/v1/tournaments/{tournament_id}/teams"
+}
+
+export type registrationCreateTeamErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type registrationCreateTeamError =
+  registrationCreateTeamErrors[keyof registrationCreateTeamErrors]
+
+export type registrationCreateTeamResponses = {
+  /**
+   * Successful Response
+   */
+  201: TeamDetail
+}
+
+export type registrationCreateTeamResponse =
+  registrationCreateTeamResponses[keyof registrationCreateTeamResponses]
+
+export type registrationReadTeamData = {
+  body?: never
+  path: {
+    /**
+     * Team Id
+     */
+    team_id: string
+  }
+  query?: never
+  url: "/api/v1/teams/{team_id}"
+}
+
+export type registrationReadTeamErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type registrationReadTeamError =
+  registrationReadTeamErrors[keyof registrationReadTeamErrors]
+
+export type registrationReadTeamResponses = {
+  /**
+   * Successful Response
+   */
+  200: TeamDetail
+}
+
+export type registrationReadTeamResponse =
+  registrationReadTeamResponses[keyof registrationReadTeamResponses]
+
+export type registrationPreviewTeamInviteData = {
+  body?: never
+  path: {
+    /**
+     * Token
+     */
+    token: string
+  }
+  query?: never
+  url: "/api/v1/team-invites/{token}"
+}
+
+export type registrationPreviewTeamInviteErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type registrationPreviewTeamInviteError =
+  registrationPreviewTeamInviteErrors[keyof registrationPreviewTeamInviteErrors]
+
+export type registrationPreviewTeamInviteResponses = {
+  /**
+   * Successful Response
+   */
+  200: TeamInvitePreview
+}
+
+export type registrationPreviewTeamInviteResponse =
+  registrationPreviewTeamInviteResponses[keyof registrationPreviewTeamInviteResponses]
+
+export type registrationJoinTeamData = {
+  body?: never
+  path: {
+    /**
+     * Token
+     */
+    token: string
+  }
+  query?: never
+  url: "/api/v1/team-invites/{token}/members"
+}
+
+export type registrationJoinTeamErrors = {
+  /**
+   * Validation Error
+   */
+  422: HTTPValidationError
+}
+
+export type registrationJoinTeamError =
+  registrationJoinTeamErrors[keyof registrationJoinTeamErrors]
+
+export type registrationJoinTeamResponses = {
+  /**
+   * Successful Response
+   */
+  200: TeamDetail
+}
+
+export type registrationJoinTeamResponse =
+  registrationJoinTeamResponses[keyof registrationJoinTeamResponses]
+
+export type registrationListMyTeamsData = {
+  body?: never
+  path?: never
+  query?: never
+  url: "/api/v1/accounts/me/teams"
+}
+
+export type registrationListMyTeamsResponses = {
+  /**
+   * Response Registration-List My Teams
+   *
+   * Successful Response
+   */
+  200: Array<MyTeamCard>
+}
+
+export type registrationListMyTeamsResponse =
+  registrationListMyTeamsResponses[keyof registrationListMyTeamsResponses]

@@ -288,7 +288,7 @@ def test_malformed_authorization_header_is_401(client: TestClient, header: str) 
 # ---------------------------------------------------------------- 身分清單
 
 
-def test_regular_account_has_only_browse_identity(
+def test_regular_account_has_browse_and_my_teams_identities(
     client: TestClient, session: Session
 ) -> None:
     account = _make_account(session)
@@ -298,7 +298,10 @@ def test_regular_account_has_only_browse_identity(
     )
 
     assert response.status_code == 200
-    assert response.json() == [{"key": "browse", "label": "瀏覽賽事", "home_path": "/"}]
+    assert response.json() == [
+        {"key": "browse", "label": "瀏覽賽事", "home_path": "/"},
+        {"key": "my_teams", "label": "我的隊伍", "home_path": "/me/teams"},
+    ]
 
 
 def test_platform_admin_also_has_platform_admin_identity(
@@ -312,6 +315,7 @@ def test_platform_admin_also_has_platform_admin_identity(
 
     assert response.json() == [
         {"key": "browse", "label": "瀏覽賽事", "home_path": "/"},
+        {"key": "my_teams", "label": "我的隊伍", "home_path": "/me/teams"},
         {
             "key": "platform_admin",
             "label": "平台管理",

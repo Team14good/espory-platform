@@ -37,6 +37,21 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-5-forgot-reset-password.md`
   summary: `tests/test_migrations.py` 只開 `compare_type`，沒有比對 server default；遷移檔與模型的 `server_default` 不一致（例如 `account.credentials_version` 的 `"0"` 被刪掉或改值）時測試照樣通過。測試資料庫每次從空表升級，也測不到「既有帳號升級後拿到 0」（低；若遷移檔被改錯，為 medium：有資料的資料庫升級失敗，或舊登入全部失效）。
   evidence: 2026-10-28 Story 1.5 第二輪 Code Review（Verification Gap）。比對設定自 Story 1.1 起就是如此，不是本 Story 造成。處理時在 `MigrationContext.configure` 加 `"compare_server_default": True`，先跑一次確認其他既有欄位沒有誤報；要完整守住資料升級，另寫一支「升到上一版、插入帳號、再升到 head」的測試。
+
+## Deferred from: spec-3-1-create-team-and-invite-members.md (2026-10-30)
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-create-team-and-invite-members.md`
+  summary: Story 2.2 合併後，替 `team`、`team_member`、`registration` 的 `tournament_id` 補上外鍵到 `tournament.id`（另一支遷移檔），並移除 registration 等待 2.2 的暫時寫法。
+  evidence: 3.1 依 CONTRIBUTING 6.5 照 `contracts/tournaments.md` 先寫、不合併 story/2-2。要處理的地方：`backend/app/modules/registration/service.py` 呼叫 tournaments 的三處 `# type: ignore[attr-defined]  # ty: ignore[unresolved-attribute]` 與本地 `_Tournament` Protocol（改用 `TournamentRead`）；`backend/tests/registration/test_teams.py` 的 `FakeTournaments` 替身改成以 2.2 的真實賽事資料測試（`tournaments` fixture）。
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-create-team-and-invite-members.md`
+  summary: 建隊與加入的人數上限仰賴 `lock_tournament` 的列鎖，目前沒有真實 PostgreSQL 的平行加入測試；替身不會加鎖，名額只剩 1 人時多人同時加入是否只成功 1 人未經驗證（未證實會出錯；若鎖失效，為 high：隊伍超過先發＋替補）。
+  evidence: 3.1 的測試以唯一鍵防線驗證（重複 TeamMember 被資料庫拒絕、service 轉成 409 `ALREADY_IN_TOURNAMENT`），但人數上限沒有資料庫約束。2.2 合併後，比照 deferred 中 1.5 的作法另建測試架構：自行提交資料、多條連線、多執行緒以 barrier 同時呼叫加入，斷言成功數不超過剩餘名額，其餘為 `TEAM_FULL`。
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-create-team-and-invite-members.md`
+  summary: Story 2.4 建立 S2 時，要把 `CreateTeamDialog`（`frontend/src/features/registration/CreateTeamDialog.tsx`）放上 S2 的「建立隊伍」（主辦方與自訂賽事不顯示），並確認 S19「回到賽事頁」的 `/tournaments/{id}` 連結可用；在此之前畫面上沒有建隊入口，回賽事頁連結會到找不到頁面。
+  evidence: 3.1 第 1 輪 Code Review（Edge Case Hunter、Blind Hunter）。依 3.1 Decisions 刻意只做 Dialog 元件，S2 屬 B 的 2.4。
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-create-team-and-invite-members.md`
+  summary: Story 2.2 合併後，先拿掉 `backend/tests/registration/test_teams.py` 替身的 `monkeypatch.setattr(..., raising=False)`（或直接改用真實賽事），否則 2.2 改了函式名稱或簽名時測試仍會通過（medium）。
+  evidence: 3.1 第 1 輪 Code Review（Verification Gap）。`raising=False` 會把不存在或已改名的屬性直接補上，測試無法發現介面不一致。
 - source_spec: `_bmad-output/implementation-artifacts/spec-5-3-score-rules.md`
   summary: （低）`rounds` 型態的回合數沒有上限，純函式 `scoring.make_game` 接受任意大的非負整數；寫入資料庫的整數欄位時可能溢位。
   evidence: 2026-10-29 Story 5.3 第一階段審查（Edge Case Hunter、Blind Hunter）。第二階段寫 `record_game` 的 API schema 時，以 `Field(ge=0, le=...)` 設定合理範圍（例如 999），回 422。

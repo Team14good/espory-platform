@@ -33,6 +33,20 @@ import type {
   identityVerifyEmailData,
   identityVerifyEmailErrors,
   identityVerifyEmailResponses,
+  registrationCreateTeamData,
+  registrationCreateTeamErrors,
+  registrationCreateTeamResponses,
+  registrationJoinTeamData,
+  registrationJoinTeamErrors,
+  registrationJoinTeamResponses,
+  registrationListMyTeamsData,
+  registrationListMyTeamsResponses,
+  registrationPreviewTeamInviteData,
+  registrationPreviewTeamInviteErrors,
+  registrationPreviewTeamInviteResponses,
+  registrationReadTeamData,
+  registrationReadTeamErrors,
+  registrationReadTeamResponses,
   utilsHealthCheckData,
   utilsHealthCheckResponses,
 } from "./types.gen"
@@ -316,6 +330,111 @@ export class IdentityService {
       responseType: "json",
       security: [{ scheme: "bearer", type: "http" }],
       url: "/api/v1/accounts/me/identities",
+      ...options,
+    })
+  }
+}
+
+export class RegistrationService {
+  /**
+   * Create Team
+   *
+   * S16 建立隊伍：建立者成為隊長，報名狀態為「組隊中」，並產生邀請連結。
+   */
+  public static createTeam<ThrowOnError extends boolean = true>(
+    options: Options<registrationCreateTeamData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).post<
+      registrationCreateTeamResponses,
+      registrationCreateTeamErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/tournaments/{tournament_id}/teams",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    })
+  }
+
+  /**
+   * Read Team
+   *
+   * S17 隊伍頁；只有隊員能看，其他帳號回 403 `TEAM_MEMBER_REQUIRED`。
+   */
+  public static readTeam<ThrowOnError extends boolean = true>(
+    options: Options<registrationReadTeamData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).get<
+      registrationReadTeamResponses,
+      registrationReadTeamErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/teams/{team_id}",
+      ...options,
+    })
+  }
+
+  /**
+   * Preview Team Invite
+   *
+   * S19 邀請連結的公開預覽（不需登入）：賽事、遊戲、隊名與是否已滿。
+   */
+  public static previewTeamInvite<ThrowOnError extends boolean = true>(
+    options: Options<registrationPreviewTeamInviteData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).get<
+      registrationPreviewTeamInviteResponses,
+      registrationPreviewTeamInviteErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      url: "/api/v1/team-invites/{token}",
+      ...options,
+    })
+  }
+
+  /**
+   * Join Team
+   *
+   * S19 以邀請連結加入隊伍，成為選手。
+   */
+  public static joinTeam<ThrowOnError extends boolean = true>(
+    options: Options<registrationJoinTeamData, ThrowOnError>,
+  ) {
+    return (options.client ?? client).post<
+      registrationJoinTeamResponses,
+      registrationJoinTeamErrors,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/team-invites/{token}/members",
+      ...options,
+    })
+  }
+
+  /**
+   * List My Teams
+   *
+   * S12 我的隊伍：目前帳號加入的每支隊伍與報名狀態。
+   */
+  public static listMyTeams<ThrowOnError extends boolean = true>(
+    options?: Options<registrationListMyTeamsData, ThrowOnError>,
+  ) {
+    return (options?.client ?? client).get<
+      registrationListMyTeamsResponses,
+      unknown,
+      ThrowOnError
+    >({
+      responseType: "json",
+      security: [{ scheme: "bearer", type: "http" }],
+      url: "/api/v1/accounts/me/teams",
       ...options,
     })
   }
