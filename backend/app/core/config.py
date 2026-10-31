@@ -1,4 +1,5 @@
 import warnings
+from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import (
@@ -40,6 +41,9 @@ class Settings(BaseSettings):
 
     # worker 每一輪之間等待的秒數（AD-7：15～30 秒）
     WORKER_POLL_SECONDS: int = Field(default=20, ge=15, le=30)
+
+    # 上傳檔案的存放資料夾（AD-15）；容器內對應 compose.yml 的 volume `uploads:/app/uploads`
+    UPLOAD_DIR: Path = Path("/app/uploads")
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
